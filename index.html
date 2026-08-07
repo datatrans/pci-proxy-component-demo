@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Component Demo</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #f7f8f9;
+        display: flex;
+        justify-content: center;
+        padding: 48px 340px 48px 340px;
+        gap: 40px;
+      }
+      #setup-form {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 300px;
+        padding: 24px 20px;
+        background: #1a1a2e;
+        border-right: 1px solid #2d2d4a;
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+      #setup-form h2 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ccc;
+      }
+      #setup-form label {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        color: #999;
+        margin-bottom: 3px;
+      }
+      #setup-form input[type='text'],
+      #setup-form input[type='email'],
+      #setup-form select {
+        width: 100%;
+        padding: 5px 7px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #ddd;
+        background: #2d2d4a;
+        margin-bottom: 8px;
+        box-sizing: border-box;
+      }
+      #setup-form .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      #setup-form .checkbox-row input {
+        width: auto;
+        margin: 0;
+      }
+      #setup-form .checkbox-row label {
+        margin: 0;
+        font-size: 12px;
+        color: #bbb;
+      }
+      #setup-form button {
+        width: 100%;
+        padding: 7px;
+        background: green;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 2px;
+      }
+      #setup-form button:hover {
+        background: #aaa;
+      }
+      #setup-form fieldset {
+        border: none;
+        padding: 0;
+        margin-bottom: 16px;
+      }
+      #setup-form fieldset:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      #unmount-fieldset {
+        margin-top: 16px;
+      }
+      #setup-form [type='submit'] {
+        background: #2e7d32;
+      }
+      #setup-form [type='submit']:hover {
+        background: #388e3c;
+      }
+      #setup-form #unmount-btn {
+        background: #c62828;
+      }
+      #setup-form #unmount-btn:hover {
+        background: #d32f2f;
+      }
+      #payment-container {
+        width: 390px;
+        border-radius: 12px;
+        box-shadow:
+          0 6px 12px rgba(0, 17, 44, 0.08),
+          0 2px 4px rgba(0, 17, 44, 0.04);
+        overflow: hidden;
+      }
+      #payment-container:empty {
+        display: none;
+      }
+      #event-log {
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 300px;
+        background: #1a1a2e;
+        border-left: 1px solid #2d2d4a;
+        overflow-y: auto;
+        padding: 24px 20px;
+        box-sizing: border-box;
+      }
+      #event-log h2 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ccc;
+      }
+      #event-log:empty::after {
+        content: 'No events yet';
+        color: #555;
+        font-size: 12px;
+      }
+      .log-entry {
+        margin-bottom: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        font-size: 12px;
+      }
+      .log-entry-header {
+        padding: 6px 10px;
+        font-weight: 600;
+      }
+      .log-entry-body {
+        padding: 8px 10px;
+      }
+      .log-entry-body pre {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .log-entry.success .log-entry-header {
+        background: #1b3a1b;
+        color: #66bb6a;
+      }
+      .log-entry.success .log-entry-body {
+        background: #162216;
+        color: #a5d6a7;
+      }
+      .log-entry.error .log-entry-header {
+        background: #3a1b1b;
+        color: #ef5350;
+      }
+      .log-entry.error .log-entry-body {
+        background: #221616;
+        color: #ef9a9a;
+      }
+      .log-entry-body .redirect-btn {
+        display: block;
+        margin-top: 8px;
+        padding: 6px 12px;
+        background: #1565c0;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .log-entry-body .redirect-btn:hover {
+        background: #1976d2;
+      }
+      @media (max-width: 1024px) {
+        body {
+          flex-direction: column;
+          align-items: center;
+          padding: 0;
+        }
+        #setup-form {
+          position: static;
+          width: 100%;
+          max-width: none;
+          border-right: none;
+          border-radius: 8px;
+        }
+        #payment-container {
+          width: 100%;
+          max-width: none;
+        }
+        #event-log {
+          position: static;
+          width: 100%;
+          max-width: none;
+          border-left: none;
+          border-radius: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <form id="setup-form">
+      <fieldset>
+        <h2>Payment Component</h2>
+
+        <label for="transactionId">Transaction ID</label>
+        <input type="text" id="transactionId" value="" style="font-family: monospace" />
+
+        <label for="locale">Locale</label>
+        <select id="locale">
+          <option value="en_US" selected>en_US (English)</option>
+          <option value="en_GB">en_GB (English)</option>
+          <option value="de_CH">de_CH (Deutsch)</option>
+          <option value="de_DE">de_DE (Deutsch)</option>
+          <option value="de_AT">de_AT (Deutsch)</option>
+        </select>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="clickToPayEnabled" checked />
+          <label for="clickToPayEnabled">Click to Pay enabled</label>
+        </div>
+
+        <label for="clickToPayCustomerEmail">Customer Email (optional)</label>
+        <input type="email" id="clickToPayCustomerEmail" placeholder="e.g. user@example.com" />
+
+        <label for="clickToPayStartScreen">Click to Pay start screen</label>
+        <select id="clickToPayStartScreen">
+          <option value="card-form" selected>card-form</option>
+          <option value="capture-id">capture-id</option>
+        </select>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="debug" checked />
+          <label for="debug">Debug mode</label>
+        </div>
+
+        <button type="submit">Mount</button>
+      </fieldset>
+      <fieldset id="unmount-fieldset" hidden>
+        <button type="button" id="unmount-btn">Unmount</button>
+      </fieldset>
+    </form>
+
+    <div id="payment-container"></div>
+    <div id="event-log"><h2>Events</h2></div>
+
+    <script type="module">
+      import init from 'https://pay.sandbox.datatrans.com/upp/payment/js/payment-component-1.0.0.esm.js'
+
+      const form = document.getElementById('setup-form')
+      const fieldset = form.querySelector('fieldset')
+      const unmountFieldset = document.getElementById('unmount-fieldset')
+      const unmountBtn = document.getElementById('unmount-btn')
+      const eventLog = document.getElementById('event-log')
+      let instance = null
+
+      function logEvent(type, title, detail) {
+        const entry = document.createElement('div')
+        entry.className = `log-entry ${type}`
+        entry.innerHTML =
+          `<div class="log-entry-header">${title}</div>` +
+          `<div class="log-entry-body"><pre>${typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2)}</pre></div>`
+        eventLog.appendChild(entry)
+        entry.scrollIntoView({ behavior: 'smooth' })
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        fieldset.disabled = true
+        unmountFieldset.hidden = false
+
+        const container = document.getElementById('payment-container')
+
+        instance = init({
+          transactionId: document.getElementById('transactionId').value,
+          locale: document.getElementById('locale').value || 'en_US',
+          clickToPayEnabled: document.getElementById('clickToPayEnabled').checked,
+          clickToPayCustomerEmail:
+            document.getElementById('clickToPayCustomerEmail').value || undefined,
+          clickToPayStartScreen: document.getElementById('clickToPayStartScreen').value,
+          debug: document.getElementById('debug').checked,
+        })
+
+        instance.onReady(() => {
+          logEvent('success', 'ready', 'Component initialized')
+        })
+
+        instance.onError((message) => {
+          logEvent('error', 'error', message)
+          unmountBtn.click()
+        })
+
+        instance.onPaymentComplete((result) => {
+          logEvent('success', 'payment-complete', result)
+          if (result.redirect) {
+            const btn = document.createElement('button')
+            btn.className = 'redirect-btn'
+            btn.textContent = 'Redirect to 3DS server'
+            btn.addEventListener('click', () => {
+              window.location.href = result.redirect
+            })
+            eventLog.lastElementChild.querySelector('.log-entry-body').appendChild(btn)
+          }
+        })
+
+        instance.mount(container)
+      })
+
+      unmountBtn.addEventListener('click', () => {
+        instance?.unmount()
+        instance = null
+        fieldset.disabled = false
+        unmountFieldset.hidden = true
+      })
+    </script>
+  </body>
+</html>
