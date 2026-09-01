@@ -105,6 +105,19 @@
       #setup-form #unmount-btn:hover {
         background: #d32f2f;
       }
+      #setup-form #submit-btn {
+        background: #1565c0;
+      }
+      #setup-form #submit-btn:hover {
+        background: #1976d2;
+      }
+      #setup-form button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      #setup-form button:disabled:hover {
+        background: #1565c0;
+      }
       #payment-container {
         width: 390px;
         border-radius: 12px;
@@ -174,6 +187,14 @@
       .log-entry.error .log-entry-body {
         background: #221616;
         color: #ef9a9a;
+      }
+      .log-entry.info .log-entry-header {
+        background: #1b2a3a;
+        color: #64b5f6;
+      }
+      .log-entry.info .log-entry-body {
+        background: #161e26;
+        color: #90caf9;
       }
       .log-entry-body .redirect-btn {
         display: block;
@@ -253,10 +274,37 @@
           <label for="debug">Debug mode</label>
         </div>
 
+        <div class="checkbox-row">
+          <input type="checkbox" id="submitButtonShown" checked />
+          <label for="submitButtonShown">Use built-in submit button</label>
+        </div>
+
         <button type="submit">Mount</button>
       </fieldset>
       <fieldset id="unmount-fieldset" hidden>
         <button type="button" id="unmount-btn">Unmount</button>
+      </fieldset>
+      <fieldset id="submit-fieldset" hidden>
+        <h2>Programmatic submit</h2>
+
+        <label for="submitAmount">Amount (minor units, optional)</label>
+        <input
+          type="text"
+          id="submitAmount"
+          inputmode="numeric"
+          placeholder="e.g. 1050"
+          style="font-family: monospace"
+        />
+
+        <label for="submitCurrency">Currency (optional)</label>
+        <input
+          type="text"
+          id="submitCurrency"
+          placeholder="e.g. USD"
+          style="font-family: monospace"
+        />
+
+        <button type="button" id="submit-btn">Submit</button>
       </fieldset>
     </form>
 
@@ -269,7 +317,9 @@
       const form = document.getElementById('setup-form')
       const fieldset = form.querySelector('fieldset')
       const unmountFieldset = document.getElementById('unmount-fieldset')
+      const submitFieldset = document.getElementById('submit-fieldset')
       const unmountBtn = document.getElementById('unmount-btn')
+      const submitBtn = document.getElementById('submit-btn')
       const eventLog = document.getElementById('event-log')
       let instance = null
 
@@ -288,6 +338,9 @@
         fieldset.disabled = true
         unmountFieldset.hidden = false
 
+        const submitButtonShown = document.getElementById('submitButtonShown').checked
+        submitFieldset.hidden = submitButtonShown
+
         const container = document.getElementById('payment-container')
 
         instance = init({
@@ -297,6 +350,7 @@
           clickToPayCustomerEmail:
             document.getElementById('clickToPayCustomerEmail').value || undefined,
           clickToPayStartScreen: document.getElementById('clickToPayStartScreen').value,
+          submitButtonShown,
           debug: document.getElementById('debug').checked,
         })
 
@@ -322,7 +376,34 @@
           }
         })
 
+        if (!submitButtonShown) {
+          submitBtn.disabled = true
+          instance.onSubmitAvailabilityChange((available) => {
+            submitBtn.disabled = !available
+            logEvent('info', 'submit-availability-change', { available })
+          })
+        }
+
         instance.mount(container)
+      })
+
+      submitBtn.addEventListener('click', () => {
+        const rawAmount = document.getElementById('submitAmount').value.trim()
+        const rawCurrency = document.getElementById('submitCurrency').value.trim()
+
+        const params = {}
+        if (rawAmount !== '') params.amount = Number(rawAmount)
+        if (rawCurrency !== '') params.currency = rawCurrency
+
+        try {
+          const submitted = instance?.submit(params)
+          logEvent(submitted ? 'info' : 'error', 'Trigger submit()', {
+            params,
+            submitted: !!submitted,
+          })
+        } catch (err) {
+          logEvent('error', 'instance.submit() error', err.message)
+        }
       })
 
       unmountBtn.addEventListener('click', () => {
@@ -330,6 +411,7 @@
         instance = null
         fieldset.disabled = false
         unmountFieldset.hidden = true
+        submitFieldset.hidden = true
       })
     </script>
   </body>
