@@ -118,6 +118,21 @@
       #setup-form button:disabled:hover {
         background: #1565c0;
       }
+      #setup-form .sidebar-links {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #2d2d4a;
+      }
+      #setup-form .sidebar-links a {
+        display: block;
+        font-size: 12px;
+        color: #64b5f6;
+        text-decoration: none;
+        margin-bottom: 6px;
+      }
+      #setup-form .sidebar-links a:hover {
+        text-decoration: underline;
+      }
       #payment-container {
         width: 390px;
         border-radius: 12px;
@@ -306,6 +321,18 @@
 
         <button type="button" id="submit-btn">Submit</button>
       </fieldset>
+
+      <div class="sidebar-links">
+        <a href="https://docs.pci-proxy.com/docs/component" target="_blank" rel="noopener"
+          >Documentation</a
+        >
+        <a
+          href="https://github.com/datatrans/pci-proxy-component-demo"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+      </div>
     </form>
 
     <div id="payment-container"></div>
