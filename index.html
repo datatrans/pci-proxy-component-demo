@@ -353,9 +353,15 @@
       function logEvent(type, title, detail) {
         const entry = document.createElement('div')
         entry.className = `log-entry ${type}`
-        entry.innerHTML =
-          `<div class="log-entry-header">${title}</div>` +
-          `<div class="log-entry-body"><pre>${typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2)}</pre></div>`
+        const header = document.createElement('div')
+        header.className = 'log-entry-header'
+        header.textContent = title
+        const body = document.createElement('div')
+        body.className = 'log-entry-body'
+        const pre = document.createElement('pre')
+        pre.textContent = typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2)
+        body.appendChild(pre)
+        entry.append(header, body)
         eventLog.appendChild(entry)
         entry.scrollIntoView({ behavior: 'smooth' })
       }
@@ -405,9 +411,13 @@
 
         if (!submitButtonShown) {
           submitBtn.disabled = true
-          instance.onSubmitAvailabilityChange((available) => {
+          instance.onSubmitAvailabilityChange((available, details) => {
             submitBtn.disabled = !available
-            logEvent('info', 'submit-availability-change', { available })
+            logEvent(
+              'info',
+              'submit-availability-change',
+              `available: ${available}\n\ndetails: ${JSON.stringify(details, null, 2)}`,
+            )
           })
         }
 
